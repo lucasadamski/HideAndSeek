@@ -1,5 +1,8 @@
-﻿namespace HideAndSeek
+﻿using System.Text;
+
+namespace HideAndSeek
 {
+
     public class Location
     {
         /// <summary>
@@ -26,12 +29,13 @@
             Name = name;
 
         }
-        /*
+        
         public string TextExitList()
         {
-
+            List<string> textExitList = (Exits.OrderBy(x => x.Value.Name).Select(x => "- the " + x.Value.Name + " is " + DescribeDirection(x.Key))).ToList();
+            return string.Concat(string.Join(Environment.NewLine, textExitList));
         }
-        */
+        
 
         /// <summary>
         /// Adds an exit to this location
@@ -41,7 +45,7 @@
         public void AddExit(Direction direction, Location connectingLocation)
         {
             Exits.Add(direction, connectingLocation);
-            connectingLocation.Exits.Add((Direction)((int)direction * (-1)), this);
+            connectingLocation.AddReturnExit(direction, this);
         }
 
         /// <summary>
@@ -61,6 +65,13 @@
                 return this;
             }
         }
+        /// <summary>
+        /// Adds a return exit to a connecting location
+        /// </summary>
+        /// <param name="direction">Direction of the connecting location</param>
+        /// <param name="connectingLocation">Location to add the return exit to</param>
+        private void AddReturnExit(Direction direction, Location connectingLocation) =>
+        Exits.Add((Direction)(-(int)direction), connectingLocation);
 
 
         /// <summary>
