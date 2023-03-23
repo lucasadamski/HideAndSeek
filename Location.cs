@@ -2,7 +2,6 @@
 
 namespace HideAndSeek
 {
-
     public class Location
     {
         /// <summary>
@@ -18,7 +17,7 @@ namespace HideAndSeek
         /// <summary>
         /// Returns a sequence of descriptions of the exits, sorted by direction
         /// </summary>
-        public IEnumerable<string> ExitList => Exits.Select(x => x.Value.Name).OrderBy(x => x);
+        public IEnumerable<string> ExitList => SortExitList();
 
         /// <summary>
         /// The constructor sets the location name
@@ -30,13 +29,28 @@ namespace HideAndSeek
 
         }
         
+        private IEnumerable<string> SortExitList()
+        {
+            Direction[] order = new Direction[] { Direction.North, Direction.East, Direction.South, Direction.West,
+                Direction.Northeast, Direction.Southeast, Direction.Southwest, Direction.Northwest, Direction.Up,
+                Direction.Down, Direction.Out, Direction.In};
+            List<string> orderedList = new List<string>();
+            for (int i = 0; i < order.Length; i++)
+            {
+                foreach (var item in Exits)
+                {
+                    if (item.Key == order[i]) orderedList.Add(" - the " + item.Value + " is " + DescribeDirection(item.Key));
+                }
+            }
+            return orderedList;
+        }
+
         public string TextExitList()
         {
-            List<string> textExitList = (Exits.OrderBy(x => x.Value.Name).Select(x => "- the " + x.Value.Name + " is " + DescribeDirection(x.Key))).ToList();
-            return string.Concat(string.Join(Environment.NewLine, textExitList));
+            return string.Concat(string.Join(Environment.NewLine, ExitList));
         }
-        
 
+       
         /// <summary>
         /// Adds an exit to this location
         /// </summary>
