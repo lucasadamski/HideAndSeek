@@ -15,7 +15,7 @@ namespace HideAndSeek
         public IDictionary<Direction, Location> Exits { get; private set; }  = new Dictionary<Direction, Location>();
 
         /// <summary>
-        /// Returns a sequence of descriptions of the exits, sorted by direction
+        /// Returns a sequence of descriptions of the exits, sorted by ?direction?
         /// </summary>
         public IEnumerable<string> ExitList => SortExitList();
 
@@ -26,20 +26,41 @@ namespace HideAndSeek
         public Location(string name)
         {
             Name = name;
-
         }
-        
-        private IEnumerable<string> SortExitList()
+
+        /// <summary>
+        /// Sorts exits by direction
+        /// </summary>
+        /// <param name="isShort">Only name of exit, or a full descripition with direction</param>
+        /// <returns></returns>
+        private IEnumerable<string> SortExitList(bool isShort = true)
         {
+
             Direction[] order = new Direction[] { Direction.North, Direction.East, Direction.South, Direction.West,
                 Direction.Northeast, Direction.Southeast, Direction.Southwest, Direction.Northwest, Direction.Up,
                 Direction.Down, Direction.Out, Direction.In};
             List<string> orderedList = new List<string>();
             for (int i = 0; i < order.Length; i++)
             {
-                foreach (var item in Exits)
+                if (isShort)
                 {
-                    if (item.Key == order[i]) orderedList.Add(" - the " + item.Value + " is " + DescribeDirection(item.Key));
+                    foreach (var item in Exits)
+                    { 
+                        if (item.Key == order[i])
+                        {
+                            orderedList.Add(item.Value.Name);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var item in Exits)
+                    {
+                        if (item.Key == order[i])
+                        {
+                            orderedList.Add(" - the " + item.Value + " is " + DescribeDirection(item.Key));
+                        }
+                    }
                 }
             }
             return orderedList;
@@ -47,7 +68,8 @@ namespace HideAndSeek
 
         public string TextExitList()
         {
-            return string.Concat(string.Join(Environment.NewLine, ExitList));
+            var fullDescriptionList = SortExitList(false);
+            return string.Concat(string.Join(Environment.NewLine, fullDescriptionList));
         }
 
        
