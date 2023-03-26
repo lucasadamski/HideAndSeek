@@ -12,19 +12,19 @@ namespace HideAndSeek
 
         static House()
         {
-            Entry.AddExit(Direction.Out, new LocationWithHidingPlace("Garage", "under the car"));
+            Entry.AddExit(Direction.Out, new LocationWithHidingPlace("Garage", "behind the car"));
             Entry.AddExit(Direction.East, new Location("Hallway"));
             Location hallway = Entry.GetExit(Direction.East);
-            hallway.AddExit(Direction.South, new LocationWithHidingPlace("Living Room", "behind sofa"));
-            hallway.AddExit(Direction.North, new LocationWithHidingPlace("Bathroom", "in the shower"));
-            hallway.AddExit(Direction.Northwest, new LocationWithHidingPlace("Kitchen", "behind stove"));
+            hallway.AddExit(Direction.South, new LocationWithHidingPlace("Living Room", "behind the sofa"));
+            hallway.AddExit(Direction.North, new LocationWithHidingPlace("Bathroom", "behind the door"));
+            hallway.AddExit(Direction.Northwest, new LocationWithHidingPlace("Kitchen", "next to the stove"));
             hallway.AddExit(Direction.Up, new Location("Landing"));
             Location landing = hallway.GetExit(Direction.Up);
-            landing.AddExit(Direction.Up, new LocationWithHidingPlace("Attic", "in the closet"));
-            landing.AddExit(Direction.South, new LocationWithHidingPlace("Pantry", "in the closet"));
+            landing.AddExit(Direction.Up, new LocationWithHidingPlace("Attic", "in a trunk"));
+            landing.AddExit(Direction.South, new LocationWithHidingPlace("Pantry", "inside a cabinet"));
             landing.AddExit(Direction.Southeast, new LocationWithHidingPlace("Kids Room", "under the desk"));
             landing.AddExit(Direction.Southwest, new LocationWithHidingPlace("Nursery", "behind curtain"));
-            landing.AddExit(Direction.West, new LocationWithHidingPlace("Second Bathroom", "in the shower"));
+            landing.AddExit(Direction.West, new LocationWithHidingPlace("Second Bathroom", "behind the door"));
             landing.AddExit(Direction.Northwest, new LocationWithHidingPlace("Master Bedroom", "inside the bed"));
             Location masterBedroom= landing.GetExit(Direction.Northwest);
             masterBedroom.AddExit(Direction.East, new LocationWithHidingPlace("Master Bath", "in the shower"));
@@ -60,7 +60,7 @@ namespace HideAndSeek
             var exitsList = location.ExitList.ToList();
             if (location.ExitList.Count() == 1) return GetLocationByName(location.ExitList.First());
 
-            return GetLocationByName(exitsList[Random.Next(0, (exitsList.Count() + 1))]);
+            return GetLocationByName(exitsList[Random.Next(0, (exitsList.Count()))]);
         }
 
         public static void ClearHidingPlaces()
