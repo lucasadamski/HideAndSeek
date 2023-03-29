@@ -1,4 +1,5 @@
-﻿namespace HideAndSeek
+﻿
+namespace HideAndSeek
 {
 
     internal class Program

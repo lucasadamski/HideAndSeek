@@ -12,6 +12,7 @@
         public void Hide(Opponent opponent)
         {
             HidingOpponents.Add(opponent);
+            opponent.currentLocation = this;
         }
 
         public IEnumerable<Opponent> CheckHidingPlace()

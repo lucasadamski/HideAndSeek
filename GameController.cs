@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Numerics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HideAndSeek
 {
@@ -23,11 +25,13 @@ namespace HideAndSeek
         /// <summary>
         /// Private list of opponents the player has found so far
         /// </summary>
-        private readonly List<Opponent> foundOpponents = new List<Opponent>();
+        public readonly List<Opponent> foundOpponents = new List<Opponent>();
         /// <summary>
         /// Returns true if the game is over
         /// </summary>
         public bool GameOver => Opponents.Count() == foundOpponents.Count();
+
+        public Dictionary<string, string> opponentLocations { get; private set; } = new Dictionary<string, string>();
         /// <summary>
         /// A prompt to display to the player
         /// </summary>
@@ -47,7 +51,12 @@ namespace HideAndSeek
         {
             House.ClearHidingPlaces();
             foreach (var opponent in Opponents)
+            {
                 opponent.Hide();
+                opponentLocations.Add(opponent.Name, opponent.currentLocation.Name); //works incorrectly
+            }
+                
+       
             CurrentLocation = House.Entry;
         }
         /// <summary>
@@ -69,6 +78,15 @@ namespace HideAndSeek
         /// <returns>The results of parsing the input</returns>
         public string ParseInput(string input)
         {
+            if (input.Length > 4 && input.Trim().ToLower().Substring(0, 4) == "save")
+            {
+                return Save(input.Substring(4).ToLower().Trim());
+            }
+            if (input.Length > 4 && input.Trim().ToLower().Substring(0, 4) == "load")
+            {
+                return Load(input.Substring(4).ToLower().Trim());
+            }
+
             if (input.ToLower().Trim() == "check")
             {
                 MoveNumber++;
@@ -133,7 +151,6 @@ namespace HideAndSeek
             else                            
                 stringFoundOpponents = $"You have found {foundOpponents.Count()} of {Opponents.Count()} opponents: {string.Join(", ", (foundOpponents.Select(x => x.Name)))}";
 
-
             if (CurrentLocation is LocationWithHidingPlace locationWithHidingPlace)
             {
                 return $"You are in the {CurrentLocation.Name}. You see the following exits:{Environment.NewLine}{CurrentLocation.TextExitList()}{Environment.NewLine}Someone could hide {locationWithHidingPlace.HidingPlace}{Environment.NewLine}{stringFoundOpponents}";
@@ -142,6 +159,61 @@ namespace HideAndSeek
             {
                 return $"You are in the {CurrentLocation.Name}. You see the following exits:{Environment.NewLine}{CurrentLocation.TextExitList()}{Environment.NewLine}{stringFoundOpponents}";
             }
+        }
+
+        public string Save(string fileName)
+        {
+            if (fileName.Contains(@"\") || fileName.Contains(@"/") || fileName.Contains(@" "))
+            {
+                return "Please provide name without slashes or spaces.";
+            }
+            SavedGame savedGame = new SavedGame()
+            {
+                MoveNumber = this.MoveNumber,
+                CurrentLocation = this.CurrentLocation.Name,
+                FoundOpponents = this.foundOpponents.Select(x => x.Name).ToList(),
+                OpponentLocations = this.opponentLocations,
+                Opponents = this.Opponents.Select(x => x.Name).ToList()
+            };
+            var jsonString = JsonSerializer.Serialize(savedGame);
+            File.WriteAllText(fileName, jsonString);
+            return $"Saved current game to {fileName}";
+        }
+
+        public string Load(string fileName)
+        {
+            if(fileName.Contains(@"\") || fileName.Contains(@"/") || fileName.Contains(@" "))
+            {
+                return "Please provide name without slashes or spaces.";
+            }
+            SavedGame loadGame = new SavedGame();
+            string jsonString;
+            jsonString = File.ReadAllText(fileName);
+            loadGame = JsonSerializer.Deserialize<SavedGame>(jsonString);
+            House.ClearHidingPlaces();
+            this.MoveNumber = loadGame.MoveNumber;
+            this.CurrentLocation = House.GetLocationByName(loadGame.CurrentLocation);
+            
+            foundOpponents.Clear();
+            foreach (var item in loadGame.FoundOpponents)
+            {
+                foundOpponents.Add(new Opponent(item));
+            }
+            Opponents.ToList().Clear();
+            foreach (var item in loadGame.Opponents)
+            {  
+                Opponents.ToList().Add(new Opponent(item));
+            }
+            foreach(var item in loadGame.OpponentLocations)
+            {
+                Opponent op = Opponents.Where(x => x.Name == item.Key).First();
+                if(House.GetLocationByName(item.Value) is LocationWithHidingPlace locationWithHidingPlace)
+                {
+                    locationWithHidingPlace.Hide(op);
+                }
+            }
+            return $"Loaded current game from {fileName}";
+
         }
 
     }
